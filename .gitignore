@@ -1,0 +1,41 @@
+# ───────────────────────────────────────────────────────────────
+#  Files that must NOT be published to GitHub
+# ───────────────────────────────────────────────────────────────
+
+# --- Private business context (daily-update skill) ---
+**/daily-update/assets/search_context.md
+
+# --- Generated reports (may contain sensitive analysis) ---
+daily-update-reports/
+*-daily-update.md
+*-daily-update.docx
+
+# --- Secrets / credentials ---
+.env
+.env.*
+*.key
+*secret*
+*credentials*
+openrouter*.txt
+
+# --- Word / Office lock & temp files ---
+~$*.docx
+~$*.doc
+*.tmp
+
+# --- Python cache ---
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+
+# --- OS junk ---
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- Editor / IDE ---
+.vscode/
+.idea/
+*.swp
