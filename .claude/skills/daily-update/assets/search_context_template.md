@@ -51,6 +51,17 @@ drives your revenue, and what kind of news would move it.
 ## Regions or jurisdictions of concern
 - [e.g., Indonesia, Singapore, Hong Kong, China, European Union]
 
+## News languages & preferred sources
+<!--
+The skill always searches in English, AND in every language you list here, for
+every topic. Local-language reporting often breaks regional news first (or only),
+so list the language(s) of the markets you care about. You can also name outlets
+you trust or want prioritized, and any you want avoided.
+-->
+- Languages to search (besides English): [e.g., Bahasa Indonesia; Mandarin Chinese; Japanese — or "English only" if that's all you need]
+- Preferred / trusted outlets: [e.g., Reuters, Bloomberg, AP, official regulators, company IR pages; local: Kompas, Kontan, Bisnis Indonesia]
+- Sources to avoid or treat with caution: [e.g., unverified blogs, known low-quality aggregators]
+
 ## Notes for Claude
 - [Optional: ongoing situations to keep an eye on, internal priorities, anything
    that gives extra context on why certain topics matter right now]

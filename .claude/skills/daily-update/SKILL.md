@@ -8,7 +8,7 @@ description: Generates a comprehensive daily intelligence briefing by researchin
 Produces a daily intelligence briefing tailored to the user's company, industry,
 competitors, and risk areas — defined once in
 `.claude/skills/daily-update/assets/search_context.md` — by
-researching recent developments via the Perplexity Sonar Pro research model
+researching recent developments via the Perplexity Sonar research model
 (through OpenRouter) and Claude's own web search, then synthesizing everything
 into a dated markdown report covering news, risk impact, and mitigation steps.
 
@@ -69,16 +69,23 @@ customers buy. A customer segment under financial pressure, regulatory squeeze,
 or a demand shift may cut or grow its spend with the company — that revenue
 linkage is the lens, not customer-industry news for its own sake.
 
-**Always research in both English and the local language (Bahasa Indonesia) for
-every topic.** This company operates in Indonesia, and the most timely, granular
-reporting — local regulators, regional outages, domestic competitor moves, local
-political/economic developments — frequently breaks first (and sometimes only) in
-Indonesian-language outlets (Kompas, Kontan, Bisnis Indonesia, CNBC Indonesia,
-Detik, Tempo, Tribun, Antara, etc.) before it reaches English-language wires, if
-it ever does. When building Perplexity prompts, explicitly ask it to draw on
-Indonesian-language sources as well as English ones. Treating English-only as
-sufficient is a known blind spot that has caused this skill to miss material,
-in-scope developments on the first pass — do not repeat it.
+**Always research in English *and* in every language the user listed under
+"News languages & preferred sources" in the context file, for every topic.**
+The most timely, granular reporting — local regulators, regional outages,
+domestic competitor moves, local political/economic developments — frequently
+breaks first (and sometimes only) in local-language outlets before it reaches
+English-language wires, if it ever does. So:
+
+- Read the **"News languages & preferred sources"** section of `search_context.md`
+  and use the languages listed there (e.g. Bahasa Indonesia, Mandarin, Japanese).
+  If that section is blank or says "English only," search English only.
+- When building Perplexity prompts, explicitly ask it to draw on sources in those
+  languages as well as English, and to prioritize the user's named trusted outlets
+  and avoid any they flagged.
+
+Treating English-only as sufficient when the user has listed other languages is a
+known blind spot that has caused this skill to miss material, in-scope
+developments on the first pass — do not repeat it.
 
 ## Step 3 — Let the user pick the Perplexity model, then query via OpenRouter
 
@@ -139,16 +146,20 @@ matters more to them than speed. Use the built-in `WebSearch` tool to:
   sites, company investor-relations pages, or trade publications relevant to
   the user's industry
 
-**Run WebSearch in both English and Bahasa Indonesia for every topic — this is
-required, not optional.** `WebSearch` skews toward US/English results, so an
-English-only sweep will systematically under-cover Indonesia-specific events.
-For each area in the context file, run at least one English query *and* at least
-one Indonesian-language query (e.g. for a Java power outage:
-`"pemadaman listrik Jawa PLN gangguan [month] [year]"`; for a competitor:
-the company name plus Indonesian terms like `akuisisi`, `merger`, `restrukturisasi`,
-`anak usaha`, `dividen`). Indonesian-language searches reliably surface local
-regulator notices, regional infrastructure disruptions, and domestic competitor
-disclosures that the English pass misses. If an English and an Indonesian source
+**Run WebSearch in English *and* in each language listed under "News languages &
+preferred sources" in the context file, for every topic — this is required, not
+optional** (unless the user listed "English only"). `WebSearch` skews toward
+US/English results, so an English-only sweep systematically under-covers events
+in non-English-speaking markets. For each area in the context file, run at least
+one English query *and* at least one query in each configured local language,
+using native-language terms. For example, in Bahasa Indonesia: a power outage →
+`"pemadaman listrik Jawa PLN gangguan [month] [year]"`; a competitor → the company
+name plus terms like `akuisisi`, `merger`, `restrukturisasi`, `anak usaha`,
+`dividen`. (Translate the equivalent terms for whatever languages the user
+configured.) Local-language searches reliably surface regulator notices, regional
+infrastructure disruptions, and domestic competitor disclosures the English pass
+misses. Also honor the user's preferred/avoided outlets here — focus trusted ones
+via `allowed_domains` where useful. If an English and a local-language source
 disagree on facts, surface the discrepancy in the report rather than picking one
 silently.
 

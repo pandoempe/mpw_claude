@@ -1,0 +1,14 @@
+# Generated daily-update reports (regenerable output)
+.claude/daily-update-reports/*.docx
+.claude/daily-update-reports/*.md
+~$*.docx
+
+# Personal/private research config
+.claude/skills/daily-update/assets/search_context.md
+
+# Python
+__pycache__/
+*.pyc
+
+# Env / secrets
+.env
