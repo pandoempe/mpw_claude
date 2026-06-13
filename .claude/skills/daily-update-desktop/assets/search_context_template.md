@@ -1,19 +1,22 @@
-# Search Context for Daily Update
+# Search Context for Daily Update (Web / Desktop)
 
 <!--
 Fill in the fields below with your real information, replacing the bracketed
-placeholders. The daily-update skill reads this file to know what to research
-on your behalf — the more specific you are, the more useful the report will be.
-Once you've replaced the placeholders, you're ready to run the skill.
+placeholders. The daily-update-desktop skill reads this to know what to research
+on your behalf — the more specific you are, the more useful the briefing.
+
+On Claude.ai web / Desktop you can supply this in any of three ways:
+  1. Attach this filled-in file to the chat
+  2. Put its contents in your Claude Project's custom instructions
+  3. Paste it directly into the conversation
 -->
 
 ## Company
 <!--
-Privacy: do NOT put your real company name or website here. The research prompts
-built from this file are sent to external services (Perplexity via OpenRouter,
-web searches), so describe the company generically but specifically enough to
-research well — the easiest way is by naming peers: "an ICT company comparable
-to Telkom Sigma, AWS, or Metrodata".
+Privacy: do NOT put your real company name or website here. Web searches built
+from this file leave your machine, so describe the company generically but
+specifically enough to research well — the easiest way is by naming peers:
+"an ICT company comparable to Telkom Sigma, AWS, or Metrodata".
 -->
 - Profile: [Generic description by peer comparison, e.g., "An Indonesian ICT company comparable to Telkom Sigma, Metrodata, or a regional AWS-style cloud provider"]
 - Industry: [e.g., Information and Communication Technology]
@@ -35,7 +38,7 @@ skill reason about which external developments actually touch your revenue.]
 ## Topics / keywords to monitor
 - [e.g., regulatory changes in data protection / cybersecurity]
 - [e.g., US export controls on AI chips affecting Southeast Asia]
-- [e.g., USD/IDR exchange rate and Bank Indonesia rate decisions]
+- [e.g., USD/IDR exchange rate and central-bank rate decisions]
 
 ## Customer industries to watch (revenue linkage)
 <!--

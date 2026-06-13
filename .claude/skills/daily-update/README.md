@@ -11,7 +11,7 @@ The guiding principle is **validity over convenience**: every claim in the repor
 When you ask for your "daily update" (or "morning briefing", "today's digest", "catch me up on competitor/industry news", etc.), the skill:
 
 1. **Reads your context file** (`.claude/skills/daily-update/assets/search_context.md`) — your single source of truth for *what* to track.
-2. **Asks you which Perplexity model to use** before spending a paid call — Sonar Pro (recommended default), Sonar (cheap/fast), Sonar Reasoning Pro, or Sonar Deep Research — so the depth/cost trade-off is your choice each run.
+2. **Asks you which Perplexity model to use** before spending a paid call — Sonar Pro (recommended default), Sonar Pro Search (heavier retrieval), Sonar (cheap/fast), Sonar Reasoning Pro, or Sonar Deep Research — so the depth/cost trade-off is your choice each run.
 3. **Builds focused research questions** from that context and queries your chosen model through OpenRouter.
 4. **Cross-checks** the most consequential claims with `WebSearch` — **in both English and Bahasa Indonesia** — corroborating surprising findings, filling gaps, and discarding stale or unsourced material.
 5. **Writes a dated report** to `.claude/daily-update-reports/` as both Markdown and Word, and shows it to you inline.
@@ -95,6 +95,7 @@ and shown inline in the conversation. Filenames are date-based, so **re-running 
   | Option | Model id | When to pick it |
   |---|---|---|
   | **Sonar Pro** (default) | `perplexity/sonar-pro` | Balanced depth and cost — the daily default |
+  | Sonar Pro Search | `perplexity/sonar-pro-search` | Heavier agentic retrieval — more sources, busy news day |
   | Sonar | `perplexity/sonar` | Cheapest and fastest; a quick check on a quiet day |
   | Sonar Reasoning Pro | `perplexity/sonar-reasoning-pro` | Better at connecting multi-step implications |
   | Sonar Deep Research | `perplexity/sonar-deep-research` | Deep, slow, pricier — for a complex, fast-moving situation |

@@ -1,6 +1,6 @@
 ---
 name: daily-update
-description: Generates a comprehensive daily intelligence briefing by researching the company, industry, competitors, topics, and risk areas defined in .claude/skills/daily-update/assets/search_context.md, using the Perplexity Sonar Pro research model (via OpenRouter) cross-checked with WebSearch for source validity. Produces a dated markdown report covering a news summary, impact to company risk, and concrete mitigation steps. Use this skill whenever the user asks for their "daily update", "daily briefing", "morning briefing", "today's report/digest", wants to "catch up on news relevant to the company", or asks to check on competitors, industry shifts, or regulatory developments that could affect the business — even if they don't say "daily update" by name.
+description: Generates a comprehensive daily intelligence briefing by researching the company, industry, competitors, topics, and risk areas defined in .claude/skills/daily-update/assets/search_context.md, using a user-selected Perplexity Sonar research model (via OpenRouter) cross-checked with WebSearch for source validity. Produces a dated markdown report covering a news summary, impact to company risk, and concrete mitigation steps. Use this skill whenever the user asks for their "daily update", "daily briefing", "morning briefing", "today's report/digest", wants to "catch up on news relevant to the company", or asks to check on competitors, industry shifts, or regulatory developments that could affect the business — even if they don't say "daily update" by name.
 ---
 
 # Daily Update
@@ -28,34 +28,66 @@ a single AI-generated summary.
 
 Look for `search_context.md` in this skill's own `assets/` folder
 (`.claude/skills/daily-update/assets/search_context.md`). This file is the
-user's single source of truth for *what* to research: company name, business
-model, product cycle, customer, industry, competitors, topics/keywords, risk
-areas, and regions of concern.
+user's single source of truth for *what* to research: an anonymized company
+profile, business model, product cycle, customer, industry, competitors,
+topics/keywords, risk areas, and regions of concern.
 
-- If the file is missing, or still contains bracketed placeholder text like
-  `[Your Company Name]`, **stop here**. Tell the user the file needs to be
-  filled in first — `assets/search_context.md` is the live config the user
-  maintains, and a fresh template sits alongside it at
-  `assets/search_context_template.md` if they need to start over from a blank
-  copy. Running a search against an empty or templated
+**Privacy: the context file deliberately does not name the company.** The
+Company section describes it generically by peer comparison (e.g. "an ICT
+company comparable to Telkom Sigma, AWS, or Metrodata") so the user's identity
+never leaves the machine. Don't ask the user for the real name, don't infer and
+write it anywhere, and if you happen to know it from prior context, never
+include it in research prompts, web searches, or the report itself — refer to
+"the company" throughout.
+
+- If the file is missing, or the **required** sections (Company, Competitors,
+  Topics) still contain bracketed placeholder text like `[Generic description by peer comparison, ...]`,
+  **stop here**. Tell the user the file needs to be filled in first —
+  `assets/search_context.md` is the live config the user maintains, and a fresh
+  template sits alongside it at `assets/search_context_template.md` if they need
+  to start over from a blank copy. Running a search against an empty or templated
   context produces a generic, low-value report and burns a paid API call for
   nothing — pausing here is the right call, not a limitation to work around.
+  A leftover placeholder in an *optional* section (e.g. "Notes for Claude")
+  does **not** count as unfilled — don't refuse a real config over it.
 - If it looks filled in, read it fully before researching anything. Every topic
   you investigate should trace back to something the user actually told you to
   track — this keeps the report focused on what matters to *their* work, not a
   generic news roundup.
 
+Then check `.claude/daily-update-reports/` for continuity:
+
+- **If a report for *today* already exists**, ask the user (via `AskUserQuestion`)
+  whether to skip (keep the existing report), fully re-run, or deep-dive a
+  specific thread — before spending a paid API call on a likely-duplicate.
+- **Read the most recent prior report** before researching. Use it to (a) set
+  the "since [date]" window for the research prompts, (b) carry forward any
+  unresolved "monitor" items as explicit research questions for today, and
+  (c) avoid re-reporting yesterday's news as if it were new — today's report
+  should cover what *changed*.
+
 ## Step 2 — Build the research prompt(s)
 
 Translate the context file into clear research questions for Perplexity rather
 than pasting the file verbatim — a model that's told *what to look for and why*
-researches better than one handed a raw data dump. Ask specifically for *recent*
-developments (last 24–48 hours, or "since [date of last report]" if you know
-it) relevant to: the company's industry, company's products, customers industry,
+researches better than one handed a raw data dump. **Never include the real
+company name in any prompt sent to Perplexity/OpenRouter or in any web search**
+— use the generic profile from the context file (e.g. "an Indonesian ICT company
+serving banks, government, and mining customers"); the research is about the
+*environment* (competitors, regulators, macro), so the company's own name adds
+nothing and leaks identity to external services. Ask specifically for *recent*
+developments relevant to: the company's industry, company's products, customers industry,
 the named competitors, the topics/keywords being tracked, and the regions of 
 concern. Explicitly ask Perplexity to cite its sources — this is essential, 
 since the user evaluates the report partly by checking sources themselves, 
 and an uncited claim is much harder for them to verify.
+
+**Ask for a slightly wider window than you'll report on.** Perplexity handles
+very narrow windows ("last 24–48 hours") poorly — it tends to return "no
+material news" or recycle stale analysis. Ask for roughly the last 5–7 days
+instead, then filter to what's genuinely new yourself, using the previous
+report (read in Step 1) as the dedupe baseline. You do the windowing; don't
+outsource it to the research model.
 
 If the context spans several distinct areas (e.g. "competitor moves",
 "regulatory changes", "supply chain", "customer industry"), weigh whether one combined query or a
@@ -98,6 +130,10 @@ mapping to a model id passed as the script's first argument:
 
 - **Sonar Pro (Recommended)** — `perplexity/sonar-pro`. Balanced research depth
   and cost; the right default for a daily cadence.
+- **Sonar Pro Search** — `perplexity/sonar-pro-search`. Sonar Pro tuned for
+  heavier, agentic web retrieval — runs more searches per query, so it tends to
+  surface more (and fresher) sources at somewhat higher cost/latency. A good
+  pick on a busy news day when breadth of sourcing matters.
 - **Sonar** — `perplexity/sonar`. Cheapest and fastest; lighter retrieval. Good
   for a quick, low-cost check on a quiet day.
 - **Sonar Reasoning Pro** — `perplexity/sonar-reasoning-pro`. Adds a reasoning
@@ -133,9 +169,27 @@ key) for the skill to work going forward.
 
 ## Step 4 — Cross-check and supplement with WebSearch
 
-Perplexity's synthesis is a strong starting point, but treat it as a lead to
-verify, not a finished product — especially since the user has said validity
-matters more to them than speed. Use the built-in `WebSearch` tool to:
+Perplexity's output is a *lead generator*, not a source of record. Real runs of
+this skill have caught it returning "no material news" on days with major
+in-scope developments, asserting the **opposite direction** of a central-bank
+rate move, quoting a stale FX level, returning **empty citations arrays**, and
+**fabricating a multi-billion-dollar acquisition** by conflating two unrelated
+deals. So calibrate trust accordingly:
+
+- **If Perplexity reports "no news," returns no citations, or you can't
+  corroborate a claim via WebSearch, treat WebSearch as the primary research
+  channel** — don't let a "quiet day" verdict from Perplexity end the research.
+- **Never put an uncorroborated Perplexity-only claim in the report as fact.**
+  Either find an independent source or omit it (or, if it's consequential
+  enough that the user should know it's circulating, include it explicitly
+  flagged as unverified). A confident, specific, uncited claim — especially a
+  large M&A figure or a policy reversal — is a fabrication candidate, not a
+  finding.
+- When you correct or exclude a Perplexity claim, **say so in the report** (a
+  short source-validity note) — the user values knowing what was checked and
+  rejected, not just what survived.
+
+Use the built-in `WebSearch` tool to:
 
 - Corroborate Perplexity's most consequential or surprising claims with a
   source you can see directly, rather than taking its word for it
